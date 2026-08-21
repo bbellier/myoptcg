@@ -46,6 +46,11 @@ button:hover,.btn:hover{border-color:var(--accent);color:var(--accent2);backgrou
 .btn-primary{background:var(--accent3);border-color:var(--accent);color:var(--accent2);font-weight:600}
 .btn-primary:hover{background:var(--accent);color:#fff}
 .btn-inline{width:auto;margin-bottom:0}
+#auth-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 54px);padding:24px}
+.auth-box{width:100%;max-width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:28px}
+.auth-box h2{font-family:var(--font-title);font-size:28px;font-weight:700;letter-spacing:.1em;color:var(--textb);text-transform:uppercase;margin-bottom:4px}
+.auth-box p{color:var(--text2);margin-bottom:20px;font-size:13px}
+.auth-err{color:var(--red);font-size:11px;margin-top:8px}
 .tabs{border-bottom:2px solid var(--border);margin-bottom:0;padding-top:4px;display:flex}
 .tab-btn{font-family:var(--font-title);font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;border-radius:0;padding:8px 16px;cursor:pointer;transition:all .2s;width:auto;margin-bottom:0}
 .tab-btn:hover{color:var(--accent2);background:transparent;border-bottom-color:var(--accent3)}
@@ -231,6 +236,18 @@ tr.en-transit td{opacity:.5}
     </div>
   </div>
   <div id="main-loading" style="text-align:center;padding:60px"><div class="spinner"></div></div>
+  <div id="auth-section" style="display:none">
+    <div id="auth-wrap">
+      <div class="auth-box">
+        <h2>WANTED</h2>
+        <p>Gestionnaire de collection One Piece TCG</p>
+        <div class="field"><label>Email</label><input id="a-email" type="email" placeholder="vous@email.com"/></div>
+        <div class="field"><label>Mot de passe</label><input id="a-pwd" type="password" placeholder="••••••••"/></div>
+        <button class="btn btn-primary" id="auth-btn" onclick="doAuth()">Se connecter</button>
+        <div id="auth-msg"></div>
+      </div>
+    </div>
+  </div>
     <div id="layout" style="display:none;flex:1">
     <div id="sidebar"><div id="sidebar-content"></div></div>
     <div id="main"><div id="main-content"></div></div>
@@ -250,7 +267,7 @@ const SUPABASE_URL  = 'https://ngbussmpjrqnedfxwsms.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nYnVzc21wanJxbmVkZnh3c21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTgyNjQsImV4cCI6MjA5MDczNDI2NH0.4Rr7Ye_XJTgxDkE5rO3Q0WiEwe_qhyxajzYPqkuHLOI'
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
-const currentUser = {id:'8e0e3b24-8fe2-4318-950c-57101a14dfa5'} // toi, seul utilisateur
+let currentUser = null
 let refCache = [], collCache = {}
 let itemsCache = [], itemsCollCache = {}
 let seriesMetaCache = {} // { serie: { jp, en, fr, nom, date } }
@@ -262,12 +279,44 @@ let derniereMaj = ''
 let sortCol = null, sortDir = 1
 
 // ── INIT ──────────────────────────────────────────────────────
-async function init() { await showApp() }
+async function init() {
+  const {data:{session}} = await sb.auth.getSession()
+  currentUser = session?.user ?? null
+  sb.auth.onAuthStateChange((_e,s) => { currentUser = s?.user ?? null; route() })
+  route()
+}
+
+function route() {
+  document.getElementById('main-loading').style.display = 'none'
+  if (currentUser) {
+    document.getElementById('auth-section').style.display = 'none'
+    showApp()
+  } else {
+    document.getElementById('layout').style.display = 'none'
+    document.getElementById('auth-section').style.display = 'block'
+  }
+}
+
+// ── AUTH (sign-in only, pas d'inscription) ──────────────────────
+async function doAuth() {
+  const email = document.getElementById('a-email').value
+  const pwd   = document.getElementById('a-pwd').value
+  const {error} = await sb.auth.signInWithPassword({email, password:pwd})
+  if (error) document.getElementById('auth-msg').innerHTML = `<div class="auth-err">Email ou mot de passe incorrect</div>`
+}
+document.addEventListener('keydown', e => {
+  const pwd = document.getElementById('a-pwd')
+  if (e.key === 'Enter' && pwd && pwd === document.activeElement) doAuth()
+})
+
+async function logout() { await sb.auth.signOut(); location.reload() }
 
 // ── APP ───────────────────────────────────────────────────────
 async function showApp() {
-  document.getElementById('main-loading').style.display = 'none'
   document.getElementById('layout').style.display = 'flex'
+  document.getElementById('nav-user-wrap').innerHTML = `
+    <span class="nav-user" style="margin-right:8px">${currentUser.email}</span>
+    <button class="btn btn-inline" style="width:auto;border-color:var(--red);color:var(--red)" onclick="logout()">Déconnexion</button>`
   await Promise.all([loadRef(), loadCollection(), loadItems(), loadItemsCollection()])
   buildSeriesMeta()
   renderTopbarMaj()
