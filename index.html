@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>WANTED | One Piece TCG</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏴‍☠️</text></svg>"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inconsolata:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/><style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e17;--bg2:#111520;--bg3:#151a28;--bg4:#1a2035;
+  --border:#1e2a45;--border2:#253050;--border3:#2a4a80;
+  --accent:#3d7dca;--accent2:#4d8dda;--accent3:#1e3a60;
+  --green:#3aaa66;--green2:#0f2a1a;--green3:#1a4530;
+  --text:#c8d4e8;--text2:#7a8aaa;--text3:#3a4a65;--textb:#e8f0ff;
+  --red:#c04040;--yellow:#e8c547;
+  --radius:6px;--radius-lg:10px;
+  --font:'Inter',sans-serif;--font-title:'Rajdhani',sans-serif;--font-mono:'Inconsolata',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;overflow-x:hidden}
+#app{display:flex;flex-direction:column;min-height:100vh}
+#topbar{background:var(--bg2);border-bottom:4px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;flex-direction:column;gap:2px}
+.topbar-title{font-family:var(--font-title);font-size:19px;font-weight:700;letter-spacing:.15em;color:var(--textb);text-transform:uppercase}
+.topbar-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-maj{font-size:11px;color:var(--text3);font-family:var(--font-mono);text-align:right;line-height:1.6}
+#layout{display:flex;flex:1}
+#sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:4px solid var(--border);padding:14px;overflow-y:auto;min-height:calc(100vh - 54px)}
+#main{flex:1;padding:0 18px 18px;overflow-x:hidden;min-width:0}
+details{margin-bottom:14px}
+details summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:8px}
+details summary::-webkit-details-marker{display:none}
+details summary h5{font-family:var(--font-title);font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--text2);text-transform:uppercase;margin:0}
+details summary::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--border2);border:1px solid var(--border3);flex-shrink:0;transition:all .25s}
+details[open] summary::before{background:var(--accent);border-color:var(--accent2);box-shadow:0 0 6px rgba(61,125,202,.5)}
+.field{margin-bottom:8px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+input[type=text],input[type=email],input[type=password],select{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:6px 10px;font-family:var(--font);font-size:13px;width:100%;outline:none;transition:border .2s}
+input:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--bg3)}
+button,.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;transition:all .2s;letter-spacing:.04em;width:100%;margin-bottom:4px;white-space:nowrap}
+button:hover,.btn:hover{border-color:var(--accent);color:var(--accent2);background:var(--accent3)}
+.btn-primary{background:var(--accent3);border-color:var(--accent);color:var(--accent2);font-weight:600}
+.btn-primary:hover{background:var(--accent);color:#fff}
+.btn-inline{width:auto;margin-bottom:0}
+.tabs{border-bottom:2px solid var(--border);margin-bottom:0;padding-top:4px;display:flex}
+.tab-btn{font-family:var(--font-title);font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;border-radius:0;padding:8px 16px;cursor:pointer;transition:all .2s;width:auto;margin-bottom:0}
+.tab-btn:hover{color:var(--accent2);background:transparent;border-bottom-color:var(--accent3)}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-content{display:none;padding-top:8px}
+.tab-content.active{display:block}
+#stats-bar{display:flex;align-items:center;gap:20px;padding:10px 16px;margin:8px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);flex-wrap:wrap}
+.stat-item{font-size:10px;color:var(--text2);display:flex;flex-direction:column;gap:2px}
+.stat-item b{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.stat-item span{font-size:17px;font-family:var(--font-title);color:var(--textb);letter-spacing:.05em}
+.stat-item.yellow span{color:var(--yellow)}
+.stat-item.green span{color:var(--green)}
+.progress-bar-wrap{flex:1;min-width:80px;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#1e5ca0,#3d9aca);border-radius:2px;transition:width .5s}
+.progress-wrap{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}
+.progress-wrap b{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.progress-wrap .pct{font-size:17px;font-family:var(--font-title);color:var(--green)}
+.table-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-family:var(--font-title);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 10px;white-space:nowrap;text-align:center}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg4)}
+td{padding:9px 10px;vertical-align:middle;text-align:center}
+td.td-nom{text-align:left;color:var(--textb)}
+td.td-id{font-family:var(--font-mono);font-size:12px;color:var(--text2)}
+td.td-prix{font-family:var(--font-mono);font-size:12px;color:var(--green)}
+.nom-trunc{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.pagination{display:flex;align-items:center;gap:6px;padding:8px 14px;justify-content:space-between;flex-wrap:wrap}
+.pagination-info{font-size:12px;color:var(--text3)}
+.pagination-btns{display:flex;gap:4px}
+.page-btn{width:auto;padding:4px 12px;font-size:12px;margin:0;border-radius:var(--radius)}
+.page-btn.active{background:var(--accent3);border-color:var(--accent);color:#fff}
+.page-btn:disabled{color:var(--text3);background:transparent;border-color:var(--border);cursor:not-allowed}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg);color:var(--text2);border:1px solid var(--border2)}
+.pastille{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.15);vertical-align:middle}
+.coll-check{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:1px solid var(--border2);border-radius:3px;background:var(--bg);cursor:pointer;position:relative;transition:all .15s;vertical-align:middle}
+.coll-check:checked{background:var(--accent3);border-color:var(--accent)}
+.coll-check:checked::after{content:'';position:absolute;left:3px;top:1px;width:6px;height:3px;border-left:1.5px solid var(--accent2);border-bottom:1.5px solid var(--accent2);transform:rotate(-45deg)}
+.coll-check:hover{border-color:var(--accent);transform:scale(1.15)}
+.coll-check:focus{outline:none;box-shadow:none}
+.transit-check{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:1px solid #555;border-radius:3px;background:var(--bg);cursor:pointer;position:relative;transition:all .15s;vertical-align:middle}
+.transit-check:checked{background:#3a3a3a;border-color:#888}
+.transit-check:checked::after{content:'';position:absolute;left:3px;top:1px;width:6px;height:3px;border-left:1.5px solid #aaa;border-bottom:1.5px solid #aaa;transform:rotate(-45deg)}
+.transit-check:hover{border-color:#888;transform:scale(1.15)}
+.transit-check:focus{outline:none;box-shadow:none}
+tr.en-transit td{opacity:.5}
+.flag-dim{opacity:.25}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.chip{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;background:var(--bg);border:1px solid var(--border2);color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--accent);color:var(--accent2)}
+.chip-on{background:var(--accent3);border-color:var(--accent);color:var(--accent2);font-weight:600}
+.spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tag-serie{display:inline-block;background:var(--bg);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;font-family:var(--font-mono);font-size:12px;color:var(--text2)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 18px;font-size:13px;z-index:500;animation:fadeup .3s}
+.toast.ok{border-color:rgba(58,170,102,.5);color:var(--green)}
+.toast.err{border-color:rgba(192,64,64,.5);color:var(--red)}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.nav-user{font-size:12px;color:var(--text2);font-family:var(--font-mono)}
+.serie-prog{width:100%;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.serie-prog-fill{height:100%;background:linear-gradient(90deg,#1e5ca0,#3d9aca);border-radius:2px}
+/* ── CLASSEUR ── */
+.classeur-wrap{padding:10px 0}
+.classeur-serie-sel{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.classeur-livre{display:flex;gap:0;justify-content:center;align-items:stretch;margin:0 auto;max-width:900px;min-height:420px}
+.classeur-page{flex:1;background:var(--bg2);border:1px solid var(--border2);position:relative;min-height:380px;display:flex;flex-direction:column}
+.classeur-page.gauche{border-radius:var(--radius-lg) 0 0 var(--radius-lg);border-right:2px solid var(--border3)}
+.classeur-page.droite{border-radius:0 var(--radius-lg) var(--radius-lg) 0}
+.classeur-couverture{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:24px}
+.classeur-couverture h2{font-family:var(--font-title);font-size:32px;font-weight:700;letter-spacing:.15em;color:var(--textb);text-transform:uppercase;text-align:center}
+.classeur-couverture p{font-size:12px;color:var(--text3);font-family:var(--font-mono);text-align:center}
+.classeur-page-header{padding:8px 12px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:11px;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
+.classeur-page-content{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:8px}
+.classeur-grille{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px}
+.classeur-slot{background:var(--bg3);border:1px solid var(--border);border-radius:4px;aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-size:9px;color:var(--text3);text-align:center;position:relative;overflow:hidden}
+.classeur-slot.possede{border-color:var(--green);background:var(--green2)}
+.classeur-slot.possede .slot-id{color:var(--green)}
+.classeur-slot.transit{border-color:#555;background:#1e1e1e;opacity:.6}
+.classeur-slot.transit .slot-id{color:#888}
+.slot-num{position:absolute;top:3px;left:4px;font-size:11px;color:var(--text3);font-family:var(--font-mono)}
+.slot-id{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text2);margin-top:14px}
+.slot-nom{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
+.classeur-upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:100%;min-height:200px;border:2px dashed var(--border2);border-radius:var(--radius);margin:8px;cursor:pointer;transition:all .2s}
+.classeur-upload-zone:hover{border-color:var(--accent);background:var(--accent3)}
+.classeur-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:12px}
+.classeur-nav-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;padding:0;margin:0}
+.classeur-page-info{font-family:var(--font-mono);font-size:12px;color:var(--text3)}
+.photo-overlay{position:absolute;inset:0;display:flex;flex-direction:column}
+.photo-overlay img{width:100%;height:100%;object-fit:contain}
+.photo-actions{position:absolute;top:4px;right:4px;display:flex;gap:4px}
+.photo-action-btn{width:28px;height:28px;border-radius:50%;padding:0;margin:0;font-size:12px;background:rgba(11,14,23,.8);border-color:var(--border2)}
+/* ── POPUP CLASSEUR ── */
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;display:flex;align-items:center;justify-content:center}
+.popup-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:20px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+.popup-box h3{font-family:var(--font-title);font-size:18px;letter-spacing:.1em;color:var(--textb);margin-bottom:12px}
+.popup-photo{width:100%;border-radius:var(--radius);margin-bottom:12px}
+.popup-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-cam{color:var(--accent2);border-color:var(--accent);background:var(--accent3)}#btn-hamburger{display:none;position:fixed;bottom:20px;right:20px;z-index:300;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;font-size:18px;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);margin:0}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200}
+#sidebar-overlay.visible{display:block}
+@media(max-width:768px){
+  /* ── LAYOUT ── */
+  #layout{flex-direction:column}
+  #sidebar{position:fixed;top:0;left:-100%;width:82%;max-width:300px;height:100vh;z-index:250;transition:left .28s;border-right:2px solid var(--border);padding:16px 14px;overflow-y:auto}
+  #sidebar.open{left:0}
+  #main{padding:0 10px 100px;width:100%}
+  #btn-hamburger{display:flex;align-items:center;justify-content:center}
+
+  /* ── TOPBAR ── */
+  #topbar{padding:0 12px;height:50px}
+  .topbar-title{font-size:14px;letter-spacing:.08em}
+  .topbar-sub{display:none}
+  .topbar-maj{display:none}
+  .nav-user{display:none}
+
+  /* ── STATS BAR ── */
+#stats-bar{gap:10px;padding:8px 10px;overflow-x:auto;flex-wrap:wrap;justify-content:flex-start}
+.progress-wrap{flex:0 0 100%;order:99;margin-top:4px;min-width:unset}
+  .stat-item span{font-size:14px}
+  .stat-item b{font-size:10px}
+  .progress-wrap{min-width:100px}
+  .progress-wrap .pct{font-size:14px}
+
+  /* ── TABS ── */
+  .tab-btn{font-size:13px;padding:8px 12px}
+
+  /* ── TABLE ── */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{font-size:12px}
+  thead th{font-size:11px;padding:8px 7px}
+  td{padding:8px 7px}
+  td.td-id{font-size:11px}
+  .nom-trunc{max-width:100px}
+  .badge{font-size:10px;padding:2px 6px}
+  .tag-serie{font-size:11px}
+
+  /* ── PAGINATION ── */
+  .pagination{flex-direction:column;align-items:flex-start;gap:8px;padding:10px}
+  .pagination-btns{flex-wrap:wrap}
+  .page-btn{padding:6px 12px;font-size:13px;min-width:36px}
+
+  /* ── SIDEBAR FILTRES ── */
+  .field label{font-size:12px}
+  input[type=text],select{font-size:14px;padding:8px 10px}
+  button,.btn{font-size:13px;padding:8px 12px}
+
+  /* ── FOOTER ── */
+  footer{font-size:10px;padding:12px 16px}
+  footer span{display:none}
+  footer span:last-child{display:inline}
+
+  /* ── TOAST ── */
+  .toast{bottom:80px;right:10px;left:10px;text-align:center}
+
+  /* ── AUTH ── */
+  .auth-box{padding:20px}
+  .auth-box h2{font-size:22px}
+}
+
+@media(max-width:400px){
+  .topbar-title{font-size:12px}
+  #stats-bar{gap:8px}
+  .stat-item span{font-size:13px}
+  .nom-trunc{max-width:80px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="topbar-left" style="flex-direction:row;align-items:center;gap:12px">
+      <a href="https://datafutee.fr" title="Retour à DATAfutée" style="color:var(--text3);font-size:18px;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--text3)'"><i class="fa-solid fa-house"></i></a>
+      <div>
+        <div class="topbar-title">WANTED — One Piece TCG</div>
+        <div class="topbar-sub">TON GESTIONNAIRE DE COLLECTION FAVORI 💫</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-maj" id="topbar-maj"></div>
+      <div id="nav-user-wrap"></div>
+    </div>
+  </div>
+  <div id="main-loading" style="text-align:center;padding:60px"><div class="spinner"></div></div>
+    <div id="layout" style="display:none;flex:1">
+    <div id="sidebar"><div id="sidebar-content"></div></div>
+    <div id="main"><div id="main-content"></div></div>
+  </div>
+  <footer style="background:var(--bg2);border-top:4px solid var(--border);padding:14px 28px;text-align:center;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.8">
+    <span>One Piece TCG © Eiichiro Oda · Bandai Namco</span><br/>
+    <span>Les images des cartes sont la propriété de leurs ayants droit respectifs et sont utilisées à des fins d'identification uniquement.</span><br/>
+    <span>Cette application est un projet personnel non officiel, sans affiliation ni lien avec Bandai Namco.</span><br/>
+    <span>Développée avec ♥ par <a href="https://datafutee.fr" target="_blank" style="color:var(--accent);text-decoration:none">DATAfutée</a></span>
+  </footer>
+</div>
+<button id="btn-hamburger">☰</button>
+<div id="sidebar-overlay"></div>
+
+<script>
+const SUPABASE_URL  = 'https://ngbussmpjrqnedfxwsms.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nYnVzc21wanJxbmVkZnh3c21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTgyNjQsImV4cCI6MjA5MDczNDI2NH0.4Rr7Ye_XJTgxDkE5rO3Q0WiEwe_qhyxajzYPqkuHLOI'
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+const currentUser = {id:'8e0e3b24-8fe2-4318-950c-57101a14dfa5'} // toi, seul utilisateur
+let refCache = [], collCache = {}
+let itemsCache = [], itemsCollCache = {}
+let seriesMetaCache = {} // { serie: { jp, en, fr, nom, date } }
+let activeTab = 'cartes'
+let filtreSerie=new Set(), filtreType=new Set(), filtreCouleur=new Set(), filtreRarete=new Set(), filtreCollec=new Set(), filtreTexte=''
+let pageActuelle = 1
+const PAR_PAGE = 20
+let derniereMaj = ''
+let sortCol = null, sortDir = 1
+
+// ── INIT ──────────────────────────────────────────────────────
+async function init() { await showApp() }
+
+// ── APP ───────────────────────────────────────────────────────
+async function showApp() {
+  document.getElementById('main-loading').style.display = 'none'
+  document.getElementById('layout').style.display = 'flex'
+  await Promise.all([loadRef(), loadCollection(), loadItems(), loadItemsCollection()])
+  buildSeriesMeta()
+  renderTopbarMaj()
+  renderSidebar()
+  renderMain()
+  initHamburger()
+}
+
+// ── DONNÉES ───────────────────────────────────────────────────
+async function loadRef() {
+  let all = [], from = 0
+  const step = 1000
+  while (true) {
+    const {data} = await sb.from('cartes_referentiel').select('*')
+      .order('serie').order('carte_identifiant').range(from, from + step - 1)
+    if (!data || data.length === 0) break
+    all = all.concat(data)
+    if (data.length < step) break
+    from += step
+  }
+  // Ordre personnalisé des raretés
+  const RARETE_ORDER = {
+    'Common':0,'Uncommon':0,'Leader':0,'Promo':0,
+    'Rare':1,
+    'Pirate Foil':2,'Pirate Foil 2':2,
+    'Textured Foil':3,
+    'Full Art':4,
+    'Super Rare':5,
+    'Secret Rare':6,
+    'Alternate Art':7,'Alternate Art 1':7,'Alternate Art 2':7,
+    'Special Card':8,'Special Card 1':8,'Special Card 2':8,'Treasure Rare':8,
+    'Manga Art':9,'Manga Art 1':9,'Manga Art 2':9,
+    'DON!!':10,
+    'DON!! (foil)':11,
+    'DON!! (gold)':12
+  }
+  const rOrd = r => RARETE_ORDER[r] ?? 99
+  refCache = all.sort((a, b) => {
+    // 1. Ordre des préfixes de série
+    const po = prefixOrd(a.serie) - prefixOrd(b.serie); if (po) return po
+    // 2. Ordre numérique des séries (OP01 < OP02...)
+    const so = a.serie.localeCompare(b.serie, undefined, {numeric:true}); if (so) return so
+    // 3. Au sein d'une série : cartes natives avant cartes invitées
+    const aNative = a.carte_identifiant.startsWith(a.serie) ? 0 : 1
+    const bNative = b.carte_identifiant.startsWith(b.serie) ? 0 : 1
+    if (aNative !== bNative) return aNative - bNative
+    // 4. DON en premier parmi les natives
+    const aDon = a.carte_identifiant.includes('DON') ? 0 : 1
+    const bDon = b.carte_identifiant.includes('DON') ? 0 : 1
+    if (aDon !== bDon) return aDon - bDon
+    // 5. Ordre numérique des carte_identifiant
+    const co = a.carte_identifiant.localeCompare(b.carte_identifiant, undefined, {numeric:true}); if (co) return co
+    // 6. Ordre des raretés
+    return rOrd(a.rarete) - rOrd(b.rarete)
+  })
+  // Chercher la dernière mise à jour
+  const dates = refCache.map(c => c.updated_at).filter(Boolean).sort().reverse()
+  if (dates.length) {
+    const d = new Date(dates[0])
+    derniereMaj = d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric'})
+  }
+}
+
+async function loadCollection() {
+  if (!currentUser) return
+  let all = [], from = 0
+  const step = 1000
+  while (true) {
+    const {data} = await sb.from('collection_users').select('*')
+      .eq('user_id', currentUser.id).range(from, from + step - 1)
+    if (!data || data.length === 0) break
+    all = all.concat(data)
+    if (data.length < step) break
+    from += step
+  }
+  collCache = {}
+  all.forEach(r => { collCache[r.serie+'||'+r.carte_identifiant+'||'+r.rarete] = r })
+}
+
+function getCollVal(serie, cid, rarete, lang) {
+  return collCache[serie+'||'+cid+'||'+rarete]?.['collection_'+lang] || 0
+}
+
+function getTransitVal(serie, cid, rarete) {
+  return collCache[serie+'||'+cid+'||'+rarete]?.transit || 0
+}
+
+async function onTransit(serie, cid, rarete, checked) {
+  const key = serie+'||'+cid+'||'+rarete
+  const cur = collCache[key] || {}
+  const payload = {
+    user_id: currentUser.id,
+    serie: serie,
+    carte_identifiant: cid,
+    rarete: rarete,
+    collection_jp: cur.collection_jp ?? 0,
+    collection_en: cur.collection_en ?? 0,
+    collection_fr: cur.collection_fr ?? 0,
+    transit: checked ? 1 : 0
+  }
+  const {error} = await sb.from('collection_users').upsert(payload, {onConflict:'user_id,carte_identifiant,rarete,serie'})
+  if (!error) { collCache[key] = {...cur, ...payload}; renderCartes() }
+  else toast('Erreur sauvegarde', 'err')
+}
+
+async function viderTransit() {
+  const div = document.createElement('div')
+  div.className = 'popup-overlay'
+  const nb = Object.values(collCache).filter(r => r.transit).length
+  div.innerHTML = `<div class="popup-box">
+    <h3 style="color:var(--yellow)"><i class="fa-solid fa-cart-shopping" style="margin-right:8px"></i>Vider le transit</h3>
+    <p style="color:var(--text2);margin:12px 0">${nb} carte(s) en transit. Confirmer la suppression ?</p>
+    <div class="popup-actions">
+      <button class="btn btn-inline" style="border-color:var(--red);color:var(--red)" onclick="confirmerViderTransit();document.body.removeChild(this.closest('.popup-overlay'))">Vider</button>
+      <button class="btn btn-inline" onclick="document.body.removeChild(this.closest('.popup-overlay'))">Annuler</button>
+    </div>
+  </div>`
+  div.addEventListener('click', e => { if (e.target===div) document.body.removeChild(div) })
+  document.body.appendChild(div)
+}
+
+async function confirmerViderTransit() {
+  const keys = Object.keys(collCache).filter(k => collCache[k].transit)
+  for (const key of keys) {
+    const r = collCache[key]
+    const payload = {...r, transit: 0}
+    await sb.from('collection_users').upsert(payload, {onConflict:'user_id,carte_identifiant,rarete,serie'})
+    collCache[key] = payload
+  }
+  toast(`Transit vidé (${keys.length} cartes)`, 'ok')
+  renderCartes()
+}
+
+// Construit un index des langues disponibles par série depuis le référentiel
+function buildSeriesMeta() {
+  seriesMetaCache = {}
+  refCache.forEach(c => {
+    if (!seriesMetaCache[c.serie]) seriesMetaCache[c.serie] = {jp:false, en:false, fr:false}
+    if (c.langue_dispo_jp == 1) seriesMetaCache[c.serie].jp = true
+    if (c.langue_dispo_en == 1) seriesMetaCache[c.serie].en = true
+    if (c.langue_dispo_fr == 1) seriesMetaCache[c.serie].fr = true
+  })
+  // Fallback : si aucune série n'a de flag, on les active tous
+  const anyFlag = Object.values(seriesMetaCache).some(s => s.jp || s.en || s.fr)
+  if (!anyFlag) {
+    Object.keys(seriesMetaCache).forEach(s => {
+      seriesMetaCache[s] = {jp:true, en:true, fr:true}
+    })
+  }
+}
+
+function getLangsDispo(serie) {
+  return seriesMetaCache[serie] || {jp:true, en:true, fr:true}
+}
+
+function renderTopbarMaj() {
+  const series = [...new Set(refCache.map(c => c.serie))].length
+  document.getElementById('topbar-maj').innerHTML =
+    `${refCache.length} cartes · ${series} séries` +
+    (derniereMaj ? `<br/>Dernière maj : ${derniereMaj}` : '')
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────
+function renderSidebar() {
+  const series   = sortSeries([...new Set(refCache.map(c=>c.serie).filter(v=>v&&v!=='NA'))])
+  const types    = [...new Set(refCache.map(c=>c.categorie).filter(v=>v&&v!=='NA'))].sort()
+  const couleurs = [...new Set(refCache.map(c=>c.couleur).filter(v=>v&&v!=='NA'))].sort()
+  const raretes  = [...new Set(refCache.map(c=>c.rarete).filter(v=>v&&v!=='NA').map(r=>r.replace(/\s+\d+$/,'').trim()))].sort()
+  const collecs  = ['Pré-achetée','Pas pré-achetée','Possédées (toutes)','Manquantes (toutes)','Possédées JP','Manquantes JP','Possédées EN','Manquantes EN','Possédées FR','Manquantes FR']
+
+  const chips = (arr, set, type) => arr.map(v => {
+    const on = set.has(v)
+    return `<span class="chip ${on?'chip-on':''}" onclick="toggleFiltre('${type}','${v.replace(/'/g,"\\'")}')">${v}</span>`
+  }).join('')
+
+  document.getElementById('sidebar-content').innerHTML = `
+    <details><summary><h5>➜ Exporter</h5></summary>
+      <button class="btn" onclick="exportExcel()">↓ Exporter (.xlsx)</button>
+      <button class="btn" style="border-color:#666;color:#888" onclick="viderTransit()"><i class="fa-solid fa-cart-shopping"></i> Vider le transit</button>
+    </details>
+    <details open><summary><h5>➜ Filtres</h5></summary>
+      <div id="f-search-wrap" class="field"><label>Rechercher</label>
+        <input type="text" id="f-search" placeholder="" value="${filtreTexte}" oninput="applySearchLive(this.value)"/>
+      </div>
+      <div class="field"><label>Série</label><div class="chips-wrap">${chips(series,filtreSerie,'serie')}</div></div>
+      <div id="f-cartes-only">
+        <div class="field"><label>Type</label><div class="chips-wrap">${chips(types,filtreType,'type')}</div></div>
+        <div class="field"><label>Couleur</label><div class="chips-wrap">${chips(couleurs,filtreCouleur,'couleur')}</div></div>
+        <div class="field"><label>Rareté</label><div class="chips-wrap">${chips(raretes,filtreRarete,'rarete')}</div></div>
+        <div class="field"><label>Collection</label><div class="chips-wrap">${chips(collecs,filtreCollec,'collec')}</div></div>
+      </div>
+      <button class="btn" onclick="resetFiltres()">↺ Réinitialiser</button>
+    </details>`
+}
+
+function toggleFiltre(type, val) {
+  const map = {serie:filtreSerie, type:filtreType, couleur:filtreCouleur, rarete:filtreRarete, collec:filtreCollec}
+  const set = map[type]
+  if (set.has(val)) set.delete(val); else set.add(val)
+  pageActuelle=1; renderSidebar(); renderTabContent()
+}
+
+function applyFilter(type, val) {
+  toggleFiltre(type, val)
+}
+function applySearchLive(val) { filtreTexte=val; pageActuelle=1; renderTabContent() }
+function applySearch() { filtreTexte=document.getElementById('f-search')?.value||''; pageActuelle=1; renderTabContent() }
+function resetFiltres() {
+  filtreSerie=new Set(); filtreType=new Set(); filtreCouleur=new Set(); filtreRarete=new Set(); filtreCollec=new Set(); filtreTexte=''
+  pageActuelle=1; renderSidebar(); renderTabContent()
+}
+
+// ── MAIN ──────────────────────────────────────────────────────
+function renderMain() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="tabs">
+      <button class="tab-btn ${activeTab==='cartes'?'active':''}" onclick="switchTab('cartes',event)">CARTES</button>
+      <button class="tab-btn ${activeTab==='series'?'active':''}" onclick="switchTab('series',event)">SÉRIES</button>
+      <button class="tab-btn ${activeTab==='classeur'?'active':''}" onclick="switchTab('classeur',event)">CLASSEUR</button>
+      <button class="tab-btn ${activeTab==='market'?'active':''}" onclick="switchTab('market',event)">MARKET</button>
+      <button class="tab-btn ${activeTab==='items'?'active':''}" onclick="switchTab('items',event)">ITEMS</button>
+    </div>
+    <div id="tab-cartes" class="tab-content ${activeTab==='cartes'?'active':''}"></div>
+    <div id="tab-series" class="tab-content ${activeTab==='series'?'active':''}"></div>
+    <div id="tab-classeur" class="tab-content ${activeTab==='classeur'?'active':''}"></div>
+    <div id="tab-market" class="tab-content ${activeTab==='market'?'active':''}"></div>
+    <div id="tab-items" class="tab-content ${activeTab==='items'?'active':''}"></div>`
+  renderTabContent()
+}
+
+function switchTab(t, evt) {
+  activeTab = t
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+  if (evt) evt.target.classList.add('active')
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'))
+  document.getElementById('tab-'+t)?.classList.add('active')
+  const fo = document.getElementById('f-cartes-only')
+  if (fo) fo.style.display = t==='cartes' ? '' : 'none'
+  const fs = document.getElementById('f-search-wrap')
+  if (fs) fs.style.display = t==='cartes' ? '' : 'none'
+  const sidebar = document.getElementById('sidebar')
+  if (sidebar) sidebar.style.display = (t==='classeur' || t==='series' || t==='market') ? 'none' : ''
+  if (t==='items') renderItemsSidebar()
+  renderTabContent()
+}
+
+function renderTabContent() {
+  if (activeTab==='cartes') renderCartes()
+  else if (activeTab==='series') renderSeries()
+  else if (activeTab==='classeur') renderClasseur()
+  else if (activeTab==='market') renderMarket()
+  else if (activeTab==='items') { renderItemsSidebar(); renderItems() }
+}
+
+// ── FILTRAGE ──────────────────────────────────────────────────
+function filtrerCartes() {
+  let res = refCache.filter(c => {
+    if (filtreSerie.size > 0 && !filtreSerie.has(c.serie)) return false
+    if (filtreType.size > 0 && !filtreType.has(c.categorie)) return false
+    if (filtreCouleur.size > 0 && !filtreCouleur.has(c.couleur)) return false
+    if (filtreRarete.size > 0) {
+      const rNorm = (c.rarete||'').replace(/\s+\d+$/, '').trim()
+      if (!filtreRarete.has(rNorm)) return false
+    }
+    if (filtreTexte) {
+      const t = filtreTexte.toLowerCase()
+      if (!((c.nom||'').toLowerCase().includes(t) || (c.carte_identifiant||'').toLowerCase().includes(t) || (c.serie||'').toLowerCase().includes(t))) return false
+    }
+    if (filtreCollec.size > 0) {
+      const jp=getCollVal(c.serie,c.carte_identifiant,c.rarete,'jp'), en=getCollVal(c.serie,c.carte_identifiant,c.rarete,'en'), fr=getCollVal(c.serie,c.carte_identifiant,c.rarete,'fr')
+      const ok = [...filtreCollec].some(f => {
+        if (f==='Pré-achetée') return getTransitVal(c.serie,c.carte_identifiant,c.rarete)
+        if (f==='Pas pré-achetée') return !getTransitVal(c.serie,c.carte_identifiant,c.rarete)
+        if (f==='Possédées (toutes)') return jp||en||fr
+        if (f==='Manquantes (toutes)') return !jp&&!en&&!fr
+        if (f==='Possédées JP') return jp
+        if (f==='Manquantes JP') return !jp
+        if (f==='Possédées EN') return en
+        if (f==='Manquantes EN') return !en
+        if (f==='Possédées FR') return fr
+        if (f==='Manquantes FR') return !fr
+        return true
+      })
+      if (!ok) return false
+    }
+    return true
+  })
+  if (sortCol) {
+    res = [...res].sort((a, b) => {
+      let va = a[sortCol] ?? '', vb = b[sortCol] ?? ''
+      if (!isNaN(parseFloat(va)) && !isNaN(parseFloat(vb))) {
+        return (parseFloat(va) - parseFloat(vb)) * sortDir
+      }
+      return String(va).localeCompare(String(vb)) * sortDir
+    })
+  }
+  return res
+}
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1
+  else { sortCol = col; sortDir = 1 }
+  pageActuelle = 1; renderCartes()
+}
+
+// ── CARTES ────────────────────────────────────────────────────
+function renderCartes() {
+  const cartes = filtrerCartes()
+  const total  = cartes.length
+  const debut  = (pageActuelle-1) * PAR_PAGE
+  const page   = cartes.slice(debut, debut + PAR_PAGE)
+  const nbPages = Math.max(1, Math.ceil(total / PAR_PAGE))
+  const tous = refCache
+  const cochees = tous.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'jp') || getCollVal(c.serie,c.carte_identifiant,c.rarete,'en') || getCollVal(c.serie,c.carte_identifiant,c.rarete,'fr'))
+  const jpN = tous.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'jp')).length
+  const enN = tous.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'en')).length
+  const frN = tous.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'fr')).length
+  const prix = cochees.reduce((s,c) => s + (parseFloat(c.prix_eur)||0), 0).toFixed(2)
+  const pct  = tous.length ? (cochees.length/tous.length*100).toFixed(1) : 0
+
+  const pagesArr = []
+  const isMobile = window.innerWidth <= 768
+const windowSize = isMobile ? 1 : 2  // 3 boutons (current ± 1) ou 5 boutons (current ± 2)
+let start = Math.max(1, Math.min(pageActuelle - windowSize, nbPages - windowSize * 2))
+for (let i = start; i <= Math.min(start + windowSize * 2, nbPages); i++) pagesArr.push(i)
+
+  // Détecter les langues globalement disponibles
+  const allLangs = {jp:false, en:false, fr:false}
+  Object.values(seriesMetaCache).forEach(s => {
+    if (s.jp) allLangs.jp = true
+    if (s.en) allLangs.en = true
+    if (s.fr) allLangs.fr = true
+  })
+  // Fallback
+  if (!allLangs.jp && !allLangs.en && !allLangs.fr) { allLangs.jp=true; allLangs.en=true; allLangs.fr=true }
+
+  document.getElementById('tab-cartes').innerHTML = `
+    <div id="stats-bar">
+      <div class="stat-item"><b>Total</b><span>${tous.length}</span></div>
+      <div class="stat-item"><b>Collectées</b><span>${cochees.length}</span></div>
+      <div class="stat-item"><b>JP</b><span>${jpN}</span></div>
+      <div class="stat-item"><b>EN</b><span>${enN}</span></div>
+      <div class="stat-item"><b>FR</b><span>${frN}</span></div>
+      <div class="stat-item yellow"><b>Valeur</b><span>${prix} €</span></div>
+      <div class="progress-wrap">
+        <b>Progression</b>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+          <span class="pct">${pct}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            ${thSort('Série','serie')}${thSort('ID','carte_identifiant')}<th style="text-align:left;cursor:pointer;user-select:none" onclick="sortBy('nom')">Nom${sortCol==='nom'?(sortDir===1?' ↑':' ↓'):''}</th>
+            <th>Coul.</th>${thSort('Type','categorie')}${thSort('Rareté','rarete')}${thSort('Prix €','prix_eur')}
+            <th><i class="fa-solid fa-camera" style="font-size:11px"></i></th>
+            <th title="En transit (acheté, langue à définir)" style="color:#888"><i class="fa-solid fa-cart-shopping" style="font-size:11px"></i></th>
+            ${allLangs.jp ? `<th><img src="https://flagcdn.com/jp.svg" width="16" title="JP"/></th>` : ''}
+            ${allLangs.en ? `<th><img src="https://flagcdn.com/gb.svg" width="16" title="EN"/></th>` : ''}
+            ${allLangs.fr ? `<th><img src="https://flagcdn.com/fr.svg" width="16" title="FR"/></th>` : ''}
+          </tr></thead>
+          <tbody>${page.map(c => rowCarte(c, allLangs)).join('')}</tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="pagination-info">Lignes ${debut+1}–${Math.min(debut+PAR_PAGE,total)} sur ${total}</span>
+        <div class="pagination-btns">
+          <button class="btn page-btn" ${pageActuelle<=1?'disabled':''} onclick="goPage(1)">«</button>
+          <button class="btn page-btn" ${pageActuelle<=1?'disabled':''} onclick="goPage(${pageActuelle-1})">‹</button>
+          ${pagesArr.map(p=>`<button class="btn page-btn ${p===pageActuelle?'active':''}" onclick="goPage(${p})">${p}</button>`).join('')}
+          <button class="btn page-btn" ${pageActuelle>=nbPages?'disabled':''} onclick="goPage(${pageActuelle+1})">›</button>
+          <button class="btn page-btn" ${pageActuelle>=nbPages?'disabled':''} onclick="goPage(${nbPages})">»</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function rowCarte(c, allLangs) {
+  const pj = getCollVal(c.serie, c.carte_identifiant, c.rarete, 'jp')
+  const pe = getCollVal(c.serie, c.carte_identifiant, c.rarete, 'en')
+  const pf = getCollVal(c.serie, c.carte_identifiant, c.rarete, 'fr')
+  const pt = getTransitVal(c.serie, c.carte_identifiant, c.rarete)
+  const langs = getLangsDispo(c.serie)
+  const nom = (c.nom||'').length > 24 ? (c.nom||'').substr(0,24)+'…' : (c.nom||'')
+  const sid = c.serie.replace(/'/g,"\\'")
+  const cid = c.carte_identifiant.replace(/'/g,"\\'")
+  const rar = (c.rarete||'').replace(/'/g,"\\'")
+  const rowId = 'card-' + (c.id||'').replace(/[^a-zA-Z0-9-_]/g, '_')
+  const cartesSerieTriees = refCache.filter(x => x.serie === c.serie)
+  const posInSerie = cartesSerieTriees.findIndex(x => x.id === c.id) + 1
+  const pageClasseur = Math.ceil(posInSerie / 9)
+  const enTransit = pt && !pj && !pe && !pf
+
+  const checkCell = (lang, val, dispo) => {
+    if (!allLangs[lang]) return ''
+    if (!dispo) return `<td></td>`
+    return `<td><input type="checkbox" class="coll-check" ${val?'checked':''} onchange="onCheck('${sid}','${cid}','${rar}','${lang}',this.checked)"/></td>`
+  }
+
+  return `<tr id="${rowId}" class="${enTransit?'en-transit':''}">
+    <td><span class="tag-serie">${c.serie||''}</span></td>
+    <td class="td-id">${c.carte_identifiant}</td>
+    <td class="td-nom"><span class="nom-trunc" title="${c.nom||''}">${nom}</span></td>
+    <td>${pastilleCouleur(c.couleur)}</td>
+    <td style="font-size:10px;color:var(--text2)">${c.categorie||''}</td>
+    <td>${badgeRarete(c.rarete)}</td>
+    <td class="td-prix">${c.prix_eur!=null?Number(c.prix_eur).toFixed(2):''}</td>
+    <td><button class="btn btn-inline photo-action-btn" style="width:24px;height:24px;font-size:11px" title="Voir dans le classeur" onclick="popupClasseur('${sid}',${pageClasseur})"><i class="fa-solid fa-camera"></i></button></td>
+    <td><input type="checkbox" class="transit-check" ${pt?'checked':''} onchange="onTransit('${sid}','${cid}','${rar}',this.checked)"/></td>
+    ${checkCell('jp', pj, langs.jp)}
+    ${checkCell('en', pe, langs.en)}
+    ${checkCell('fr', pf, langs.fr)}
+  </tr>`
+}
+
+async function onCheck(serie, cid, rarete, lang, checked) {
+  const key = serie+'||'+cid+'||'+rarete
+  const cur = collCache[key] || {}
+  const payload = {
+    user_id: currentUser.id,
+    serie: serie,
+    carte_identifiant: cid,
+    rarete: rarete,
+    collection_jp: lang==='jp' ? (checked?1:0) : (cur.collection_jp ?? 0),
+    collection_en: lang==='en' ? (checked?1:0) : (cur.collection_en ?? 0),
+    collection_fr: lang==='fr' ? (checked?1:0) : (cur.collection_fr ?? 0)
+  }
+  const {error} = await sb.from('collection_users').upsert(payload, {onConflict:'user_id,carte_identifiant,rarete,serie'})
+  if (!error) { collCache[key] = payload; renderCartes() }
+  else toast('Erreur sauvegarde', 'err')
+}
+
+function goPage(p) { pageActuelle=p; renderCartes(); window.scrollTo({top:0,behavior:'smooth'}) }
+
+// ── SÉRIES ────────────────────────────────────────────────────
+function renderSeries() {
+  const series = sortSeries([...new Set(refCache.map(c=>c.serie))])
+  const filtered = series.filter(s => filtreSerie.size===0 || filtreSerie.has(s))
+  const selSeries = ['Toutes', ...series].map(s => `<option ${s===filtreSerie?'selected':''}>${s}</option>`).join('')
+
+  const rows = filtered.map(serie => {
+    const cartes = refCache.filter(c => c.serie===serie)
+    const total  = cartes.length
+    const jpN = cartes.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'jp')).length
+    const enN = cartes.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'en')).length
+    const frN = cartes.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'fr')).length
+    const possede = cartes.filter(c => getCollVal(c.serie,c.carte_identifiant,c.rarete,'jp')||getCollVal(c.serie,c.carte_identifiant,c.rarete,'en')||getCollVal(c.serie,c.carte_identifiant,c.rarete,'fr')).length
+    const totalTheo = cartes[0]?.serie_total_carte || total
+    const pct = total ? (possede/total*100).toFixed(1) : 0
+    const langs = getLangsDispo(serie)
+
+    const flagJP = `<img src="https://flagcdn.com/jp.svg" width="16" class="${langs.jp?'':'flag-dim'}" title="Japonais${langs.jp?'':' (non dispo)'}" />`
+    const flagEN = `<img src="https://flagcdn.com/gb.svg" width="16" class="${langs.en?'':'flag-dim'}" title="Anglais${langs.en?'':' (non dispo)'}" />`
+    const flagFR = `<img src="https://flagcdn.com/fr.svg" width="16" class="${langs.fr?'':'flag-dim'}" title="Français${langs.fr?'':' (non dispo)'}" />`
+
+    return `<tr>
+      <td><span class="tag-serie">${serie}</span></td>
+      <td style="text-align:left;color:var(--textb)">${cartes[0]?.serie_nom||''}</td>
+      <td>${possede} / ${totalTheo}</td>
+      <td>${langs.jp?jpN:'—'}</td>
+      <td>${langs.en?enN:'—'}</td>
+      <td>${langs.fr?frN:'—'}</td>
+      <td style="display:flex;gap:4px;justify-content:center;align-items:center">${flagJP}${flagEN}${flagFR}</td>
+      <td style="min-width:140px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="serie-prog"><div class="serie-prog-fill" style="width:${pct}%"></div></div>
+          <span style="font-size:10px;color:var(--green);min-width:36px">${pct}%</span>
+        </div>
+      </td>
+    </tr>`
+  }).join('')
+
+  document.getElementById('tab-series').innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;margin:10px 0">
+      <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Série</label>
+      <select style="width:auto" onchange="filtreSerie=this.value;renderSeries()">${selSeries}</select>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll"><table>
+        <thead><tr>
+          <th>Code</th><th style="text-align:left">Nom série</th><th>Possédées</th>
+          <th><img src="https://flagcdn.com/jp.svg" width="14"/></th>
+          <th><img src="https://flagcdn.com/gb.svg" width="14"/></th>
+          <th><img src="https://flagcdn.com/fr.svg" width="14"/></th>
+          <th>Langues</th><th>Progression</th>
+        </tr></thead>
+        <tbody>${rows||'<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">Aucune série</td></tr>'}</tbody>
+      </table></div>
+    </div>`
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function pastilleCouleur(couleur) {
+  if (!couleur || couleur==='NA') return ''
+  const hex = {'Red':'#c0392b','Green':'#27ae60','Blue':'#2980b9','Purple':'#8e44ad','Black':'#2c2c2c','Yellow':'#f1c40f','DON!!':'#888'}
+  const parts = couleur.split('/')
+  const bg = parts.length===1
+    ? (hex[parts[0].trim()]||'#3a4a65')
+    : `linear-gradient(90deg,${hex[parts[0].trim()]||'#3a4a65'} 50%,${hex[parts[1].trim()]||'#3a4a65'} 50%)`
+  return `<span class="pastille" style="background:${bg}" title="${couleur}"></span>`
+}
+
+function badgeRarete(r) {
+  if (!r || r==='NA') return ''
+  const abbr = {'Common':'C','Uncommon':'UC','Rare':'R','Super Rare':'SR','Secret Rare':'SEC','Treasure Rare':'TR','Leader':'L','Alternate Art':'ALT★','Alternate Art 1':'ALT★','Alternate Art 2':'ALT★','Manga Art':'MAN★','Manga Art 1':'MAN★','Manga Art 2':'MAN★','Full Art':'FA','Promo':'P','Pirate Foil':'PF','Pirate Foil 2':'PF','Textured Foil':'TF','Special Card':'SP','Special Card 1':'SP','Special Card 2':'SP','DON!!':'DON!!','DON!! (gold)':'DON(G)','DON!! (foil)':'DON(F)'}
+  return `<span class="badge">${abbr[r]||r}</span>`
+}
+
+// ── EXPORT EXCEL ──────────────────────────────────────────────
+function exportExcel() {
+  const rows = Object.values(collCache).filter(r => r.collection_jp || r.collection_en || r.collection_fr)
+  if (!rows.length) { toast('Aucune carte dans la collection', 'err'); return }
+
+  // Enrichir avec les infos du référentiel
+  const enriched = rows.map(r => {
+    const ref = refCache.find(c => c.carte_identifiant===r.carte_identifiant && c.rarete===r.rarete) || {}
+    return {
+      Serie: ref.serie||'', ID: r.carte_identifiant, Nom: ref.nom||'',
+      Rarete: r.rarete||'', Categorie: ref.categorie||'', Couleur: ref.couleur||'',
+      Prix_EUR: ref.prix_eur||'', JP: r.collection_jp||0, EN: r.collection_en||0, FR: r.collection_fr||0
+    }
+  })
+
+  // Construire CSV (compatible Excel)
+  const headers = Object.keys(enriched[0])
+  const csv = [headers.join(';'), ...enriched.map(r => headers.map(h => `"${String(r[h]).replace(/"/g,'""')}"`).join(';'))].join('\n')
+  const bom = '\uFEFF'
+  const blob = new Blob([bom + csv], {type:'text/csv;charset=utf-8'})
+  const url  = URL.createObjectURL(blob)
+  const a    = Object.assign(document.createElement('a'), {href:url, download:`collection_${new Date().toISOString().slice(0,10)}.csv`})
+  a.click(); URL.revokeObjectURL(url)
+  toast('Collection exportée (.csv — ouvre dans Excel)', 'ok')
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const el = document.createElement('div')
+  el.className = `toast ${type}`; el.textContent = msg
+  document.body.appendChild(el)
+  setTimeout(() => el.remove(), 3000)
+}
+
+// ── HAMBURGER ─────────────────────────────────────────────────
+function initHamburger() {
+  const btn = document.getElementById('btn-hamburger')
+  const sidebar = document.getElementById('sidebar')
+  const overlay = document.getElementById('sidebar-overlay')
+  function open()  { sidebar.classList.add('open');    overlay.classList.add('visible');    btn.textContent='✕' }
+  function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); btn.textContent='☰' }
+  btn.onclick = () => sidebar.classList.contains('open') ? close() : open()
+  overlay.onclick = close
+}
+
+// Ordre des préfixes de séries
+const SERIE_PREFIX_ORDER = ['OP','EB','PRB','ST','LD','DF','DP','SDS','TS']
+function prefixOrd(serie) {
+  const p = SERIE_PREFIX_ORDER.findIndex(px => serie.startsWith(px))
+  return p === -1 ? 99 : p
+}
+function sortSeries(arr) {
+  return [...arr].sort((a, b) => {
+    const pa = prefixOrd(a), pb = prefixOrd(b)
+    if (pa !== pb) return pa - pb
+    return a.localeCompare(b, undefined, {numeric:true})
+  })
+}
+
+function thSort(label, col) {
+  const active = sortCol === col
+  const arrow = active ? (sortDir===1?' ↑':' ↓') : ''
+  return `<th style="cursor:pointer;user-select:none${active?';color:var(--accent2)':''}" onclick="sortBy('${col}')">${label}${arrow}</th>`
+}
+
+document.addEventListener('keydown', e => {
+  if (activeTab !== 'cartes') return
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return
+  if (e.key === 'ArrowRight') {
+    const nb = Math.max(1, Math.ceil(filtrerCartes().length / PAR_PAGE))
+    if (pageActuelle < nb) { pageActuelle++; renderCartes(); window.scrollTo({top:0,behavior:'smooth'}) }
+  }
+  if (e.key === 'ArrowLeft') {
+    if (pageActuelle > 1) { pageActuelle--; renderCartes(); window.scrollTo({top:0,behavior:'smooth'}) }
+  }
+})
+
+// ── CLASSEUR ──────────────────────────────────────────────────
+let classeurSerie = null
+let classeurOuverture = 0 // 0 = couverture + page 1, 1 = page 2+3, etc.
+
+function getCartesClasseur(serie) {
+  return refCache.filter(c => c.serie === serie)
+}
+
+function storagePathPhoto(serie, page) {
+  return `${currentUser.id}/${serie}/${page}.jpg`
+}
+
+async function getPhotoUrl(serie, page) {
+  const {data} = await sb.storage.from('classeur').createSignedUrl(storagePathPhoto(serie, page), 3600)
+  return data?.signedUrl || null
+}
+
+async function uploadPhoto(serie, page, file) {
+  const {error} = await sb.storage.from('classeur').upload(storagePathPhoto(serie, page), file, {upsert:true, contentType:file.type})
+  if (error) { toast('Erreur upload', 'err'); return false }
+  toast('Photo uploadée ✓', 'ok'); return true
+}
+
+async function supprimerPhoto(serie, page) {
+  await sb.storage.from('classeur').remove([storagePathPhoto(serie, page)])
+  toast('Photo supprimée', 'ok')
+}
+
+function renderSlots(cartes, debut) {
+  return Array.from({length:9}, (_, i) => {
+    const c = cartes[debut + i]
+    if (!c) return `<div class="classeur-slot"><span class="slot-num">${debut+i+1}</span></div>`
+    const possede = getCollVal(c.serie,c.carte_identifiant,c.rarete,'jp') ||
+                    getCollVal(c.serie,c.carte_identifiant,c.rarete,'en') ||
+                    getCollVal(c.serie,c.carte_identifiant,c.rarete,'fr')
+    const transit = !possede && getTransitVal(c.serie,c.carte_identifiant,c.rarete)
+    const cls = possede ? 'possede' : transit ? 'transit' : ''
+    return `<div class="classeur-slot ${cls}">
+      <span class="slot-num">${debut+i+1}</span>
+      <span class="slot-id">${c.carte_identifiant}</span>
+      <span class="slot-nom">${(c.nom||'').substr(0,14)}</span>
+      <span class="slot-nom" style="color:var(--text3)">${badgeRareteSlot(c.rarete)}</span>
+    </div>`
+  }).join('')
+}
+
+async function renderPageClasseur(serie, numPage, side) {
+  const cartes = getCartesClasseur(serie)
+  const debut = (numPage - 1) * 9
+  const fin = Math.min(debut + 9, cartes.length)
+  const nbCartesSurPage = fin - debut
+  const photoUrl = await getPhotoUrl(serie, numPage)
+  const sid = serie.replace(/'/g,"\\'")
+
+  // Boutons selon présence de photo
+  const btnPhoto = photoUrl
+    ? `<button class="btn photo-action-btn" title="Voir la photo" onclick="ouvrirPhoto('${sid}',${numPage})"><i class="fa-solid fa-camera"></i></button>
+       <button class="btn photo-action-btn" title="Remplacer" onclick="triggerUpload('${sid}',${numPage})"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+       <button class="btn photo-action-btn" title="Supprimer" onclick="confirmerSupprimerPhoto('${sid}',${numPage})"><i class="fa-solid fa-trash"></i></button>`
+    : `<button class="btn photo-action-btn btn-cam" title="Ajouter une photo" onclick="triggerUpload('${sid}',${numPage})"><i class="fa-solid fa-camera"></i></button>`
+
+  const content = `<div style="width:100%;position:relative">
+    <div class="classeur-grille">${renderSlots(cartes, debut)}</div>
+  </div>`
+
+  return `<div class="classeur-page ${side}">
+    <div class="classeur-page-header">
+      <span>${serie} — Page ${numPage}</span>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="margin-right:4px">${debut+1}–${Math.min(debut+9,cartes.length)}</span>
+        ${btnPhoto}
+      </div>
+    </div>
+    <div class="classeur-page-content">${content}</div>
+  </div>`
+}
+
+function triggerUpload(serie, page) {
+  const input = document.createElement('input')
+  input.type='file'; input.accept='image/*'
+  input.onchange = async e => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (await uploadPhoto(serie, page, file)) renderClasseur()
+  }
+  input.click()
+}
+
+async function confirmerSupprimerPhoto(serie, page) {
+  if (!confirm(`Supprimer la photo de la page ${page} de ${serie} ?`)) return
+  await supprimerPhoto(serie, page)
+  renderClasseur()
+}
+
+async function renderClasseur() {
+  const el = document.getElementById('tab-classeur')
+  if (!el) return
+  const series = sortSeries([...new Set(refCache.map(c=>c.serie))])
+  if (!classeurSerie) classeurSerie = series[0]
+
+  const cartes = getCartesClasseur(classeurSerie)
+  const nbPages = Math.ceil(cartes.length / 9)
+  const maxOuverture = Math.ceil(nbPages / 2)
+  const selSeries = series.map(s => `<option ${s===classeurSerie?'selected':''}>${s}</option>`).join('')
+
+  let pageGaucheHtml, pageDroiteHtml
+  if (classeurOuverture === 0) {
+    // Couverture à gauche, page 1 à droite
+    const nomSerie = cartes[0]?.serie_nom || ''
+    pageGaucheHtml = `<div class="classeur-page gauche">
+      <div class="classeur-couverture">
+        <h2>${classeurSerie}</h2>
+        ${nomSerie ? `<p style="font-size:14px;color:var(--text2);font-family:var(--font-title);letter-spacing:.08em">${nomSerie}</p>` : ''}
+        <p>One Piece TCG</p>
+        <p style="margin-top:8px;font-family:var(--font-mono);font-size:11px;color:var(--text3)">${cartes.length} cartes · ${nbPages} pages</p>
+      </div>
+    </div>`
+    pageDroiteHtml = cartes.length > 0
+      ? await renderPageClasseur(classeurSerie, 1, 'droite')
+      : '<div class="classeur-page droite"></div>'
+  } else {
+    const pageG = classeurOuverture * 2
+    const pageD = pageG + 1
+    pageGaucheHtml = pageG <= nbPages
+      ? await renderPageClasseur(classeurSerie, pageG, 'gauche')
+      : '<div class="classeur-page gauche"></div>'
+    pageDroiteHtml = pageD <= nbPages
+      ? await renderPageClasseur(classeurSerie, pageD, 'droite')
+      : '<div class="classeur-page droite"></div>'
+  }
+
+  const ouvertureLabel = classeurOuverture === 0
+    ? 'Couverture'
+    : `Pages ${classeurOuverture*2} – ${Math.min(classeurOuverture*2+1, nbPages)}`
+
+  el.innerHTML = `<div class="classeur-wrap">
+    <div class="classeur-serie-sel">
+      <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Série</label>
+      <select style="width:auto" onchange="classeurSerie=this.value;classeurOuverture=0;renderClasseur()">${selSeries}</select>
+    </div>
+    <div class="classeur-livre">${pageGaucheHtml}${pageDroiteHtml}</div>
+    <div class="classeur-nav">
+      <button class="btn classeur-nav-btn" ${classeurOuverture<=0?'disabled':''} onclick="classeurOuverture--;renderClasseur()">◀</button>
+      <span class="classeur-page-info">${ouvertureLabel} / ${nbPages} pages</span>
+      <button class="btn classeur-nav-btn" ${classeurOuverture>=maxOuverture?'disabled':''} onclick="classeurOuverture++;renderClasseur()">▶</button>
+    </div>
+  </div>`
+}
+
+async function popupClasseur(serie, page) {
+  const photoUrl = await getPhotoUrl(serie, page)
+  const ouverture = page === 1 ? 0 : Math.ceil((page - 1) / 2)
+  const sid = serie.replace(/'/g,"\\'")
+
+  const div = document.createElement('div')
+  div.className = 'popup-overlay'
+  div.innerHTML = `<div class="popup-box">
+    <h3><i class="fa-solid fa-camera" style="margin-right:8px"></i>${serie} — Page ${page}</h3>
+    ${photoUrl
+      ? `<img src="${photoUrl}" class="popup-photo"/>`
+      : `<div style="padding:30px;text-align:center;color:var(--text3);font-size:13px;border:1px dashed var(--border2);border-radius:var(--radius);margin-bottom:12px">Aucune photo pour cette page</div>`}
+    <div class="popup-actions">
+      <button class="btn btn-primary btn-inline" onclick="document.body.removeChild(this.closest('.popup-overlay'));classeurSerie='${sid}';classeurOuverture=${ouverture};switchTab('classeur')">Voir dans le classeur</button>
+      <button class="btn btn-inline" onclick="document.body.removeChild(this.closest('.popup-overlay'))">Fermer</button>
+    </div>
+  </div>`
+  div.addEventListener('click', e => { if (e.target===div) document.body.removeChild(div) })
+  document.body.appendChild(div)
+}
+
+async function ouvrirPhoto(serie, page) {
+  const photoUrl = await getPhotoUrl(serie, page)
+  if (!photoUrl) { toast('Aucune photo pour cette page', 'err'); return }
+  const div = document.createElement('div')
+  div.className = 'popup-overlay'
+  div.style.background = 'rgba(0,0,0,.92)'
+  div.innerHTML = `<div style="max-width:95vw;max-height:95vh;position:relative">
+    <img src="${photoUrl}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:var(--radius-lg)"/>
+    <button class="btn btn-inline" style="position:absolute;top:-12px;right:-12px;width:28px;height:28px;border-radius:50%;padding:0;background:var(--bg2)" onclick="document.body.removeChild(this.closest('.popup-overlay'))">✕</button>
+  </div>`
+  div.addEventListener('click', e => { if (e.target===div) document.body.removeChild(div) })
+  document.body.appendChild(div)
+}
+
+function badgeRareteSlot(r) {
+  if (!r || r==='NA') return ''
+  const abbr = {'Common':'C','Uncommon':'UC','Rare':'R','Super Rare':'SR','Secret Rare':'SEC','Treasure Rare':'TR','Leader':'L','Alternate Art':'ALT','Alternate Art 1':'ALT','Alternate Art 2':'ALT','Manga Art':'MAN','Manga Art 1':'MAN','Manga Art 2':'MAN','Full Art':'FA','Promo':'P','Pirate Foil':'PF','Pirate Foil 2':'PF','Textured Foil':'TF','Special Card':'SP','Special Card 1':'SP','Special Card 2':'SP','DON!!':'DON','DON!! (gold)':'DON-G','DON!! (foil)':'DON-F'}
+  return abbr[r] || r
+}
+
+// ── MARKET ────────────────────────────────────────────────────
+function renderMarket() {
+  const el = document.getElementById('tab-market')
+  if (!el) return
+
+  const cartes = refCache.filter(c => getTransitVal(c.serie, c.carte_identifiant, c.rarete))
+  const total  = cartes.reduce((s,c) => s + (parseFloat(c.prix_eur)||0), 0).toFixed(2)
+
+  if (!cartes.length) {
+    el.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0">
+        <a href="https://fr.onepiece-cardgame.com/" target="_blank" class="btn btn-inline" style="width:auto;text-decoration:none;font-size:11px"><i class="fa-solid fa-globe"></i> Site officiel</a>
+        <a href="https://www.opecards.fr/" target="_blank" class="btn btn-inline" style="width:auto;text-decoration:none;font-size:11px"><i class="fa-solid fa-store"></i> OpeCards</a>
+        <a href="https://www.cardmarket.com/fr/OnePiece" target="_blank" class="btn btn-inline" style="width:auto;text-decoration:none;font-size:11px"><i class="fa-solid fa-tag"></i> Cardmarket</a>
+      </div>
+      <div style="text-align:center;padding:60px;color:var(--text3)">
+        <i class="fa-solid fa-cart-shopping" style="font-size:32px;margin-bottom:12px;display:block"></i>
+        Aucune carte en transit
+      </div>`
+    return
+  }
+
+  const rows = cartes.map(c => {
+    const sid = c.serie.replace(/'/g,"\\'")
+    const cid = c.carte_identifiant.replace(/'/g,"\\'")
+    const rar = (c.rarete||'').replace(/'/g,"\\'")
+    const nom = (c.nom||'').length > 28 ? (c.nom||'').substr(0,28)+'…' : (c.nom||'')
+    return `<tr>
+      <td><span class="tag-serie">${c.serie}</span></td>
+      <td class="td-id">${c.carte_identifiant}</td>
+      <td class="td-nom"><span class="nom-trunc" title="${c.nom||''}">${nom}</span></td>
+      <td>${pastilleCouleur(c.couleur)}</td>
+      <td style="font-size:10px;color:var(--text2)">${c.categorie||''}</td>
+      <td>${badgeRarete(c.rarete)}</td>
+      <td class="td-prix">${c.prix_eur!=null?Number(c.prix_eur).toFixed(2):'—'}</td>
+      <td><button class="btn btn-inline" style="width:24px;height:24px;padding:0;border-color:var(--red);color:var(--red)" title="Retirer du transit" onclick="onTransit('${sid}','${cid}','${rar}',false).then(()=>renderMarket())"><i class="fa-solid fa-xmark"></i></button></td>
+    </tr>`
+  }).join('')
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0 8px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:16px;align-items:center">
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text2)">${cartes.length} carte(s) en transit</span>
+        <span style="font-family:var(--font-mono);font-size:14px;color:var(--yellow);font-weight:600">${total} €</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <a href="https://fr.onepiece-cardgame.com/" target="_blank" class="btn btn-inline" style="width:auto;text-decoration:none;font-size:11px"><i class="fa-solid fa-globe"></i> Site officiel</a>
+        <a href="https://www.opecards.fr/" target="_blank" class="btn btn-inline" style="width:auto;text-decoration:none;font-size:11px"><i class="fa-solid fa-store"></i> OpeCards</a>
+        <a href="https://www.cardmarket.com/fr/OnePiece" target="_blank" class="btn btn-inline" style="width:auto;text-decoration:none;font-size:11px"><i class="fa-solid fa-tag"></i> Cardmarket</a>
+        <button class="btn btn-inline" style="border-color:var(--red);color:var(--red)" onclick="viderTransit()"><i class="fa-solid fa-trash"></i> Vider</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll"><table>
+        <thead><tr>
+          <th>Série</th><th>ID</th><th style="text-align:left">Nom</th><th>Coul.</th><th>Type</th><th>Rareté</th><th>Prix €</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`
+}
+
+// ── ITEMS ─────────────────────────────────────────────────────
+async function loadItems() {
+  let all = [], from = 0
+  const step = 1000
+  while (true) {
+    const {data} = await sb.from('items_referentiel').select('*')
+      .order('serie').order('type_item').range(from, from + step - 1)
+    if (!data || data.length === 0) break
+    all = all.concat(data)
+    if (data.length < step) break
+    from += step
+  }
+  itemsCache = all.sort((a, b) =>
+    prefixOrd(a.serie) - prefixOrd(b.serie) ||
+    a.serie.localeCompare(b.serie, undefined, {numeric:true}) ||
+    a.type_item.localeCompare(b.type_item)
+  )
+}
+
+async function loadItemsCollection() {
+  if (!currentUser) return
+  const {data} = await sb.from('items_collection_users').select('*').eq('user_id', currentUser.id)
+  itemsCollCache = {}
+  ;(data||[]).forEach(r => { itemsCollCache[r.item_id] = r })
+}
+
+function getItemCollVal(itemId, lang) {
+  return itemsCollCache[itemId]?.['collection_'+lang] || 0
+}
+
+async function onItemCheck(itemId, lang, checked) {
+  const cur = itemsCollCache[itemId] || {}
+  const payload = {
+    user_id: currentUser.id,
+    item_id: itemId,
+    collection_jp: lang==='jp' ? (checked?1:0) : (cur.collection_jp ?? 0),
+    collection_en: lang==='en' ? (checked?1:0) : (cur.collection_en ?? 0),
+    collection_fr: lang==='fr' ? (checked?1:0) : (cur.collection_fr ?? 0)
+  }
+  const {error} = await sb.from('items_collection_users').upsert(payload, {onConflict:'user_id,item_id'})
+  if (!error) { itemsCollCache[itemId] = payload; renderItems() }
+  else toast('Erreur sauvegarde', 'err')
+}
+
+let filtreItemsSerie = new Set(), filtreItemsType = new Set(), filtreItemsCollec = new Set()
+
+function renderItemsSidebar() {
+  const series  = sortSeries([...new Set(itemsCache.map(c=>c.serie))])
+  const types   = [...new Set(itemsCache.map(c=>c.type_item).filter(Boolean))].sort()
+  const collecs = ['Possédées (toutes)','Manquantes (toutes)','Possédées JP','Manquantes JP','Possédées EN','Manquantes EN','Possédées FR','Manquantes FR']
+
+  const chips = (arr, set, fn) => arr.map(v => {
+    const on = set.has(v)
+    return `<span class="chip ${on?'chip-on':''}" onclick="${fn}('${v.replace(/'/g,"\\'")}')">${v}</span>`
+  }).join('')
+
+  document.getElementById('sidebar-content').innerHTML = `
+    <details open><summary><h5>➜ Filtres</h5></summary>
+      <div class="field"><label>Série</label><div class="chips-wrap">${chips(series,filtreItemsSerie,'toggleItemsSerie')}</div></div>
+      <div class="field"><label>Type</label><div class="chips-wrap">${chips(types,filtreItemsType,'toggleItemsType')}</div></div>
+      <div class="field"><label>Collection</label><div class="chips-wrap">${chips(collecs,filtreItemsCollec,'toggleItemsCollec')}</div></div>
+      <button class="btn" onclick="resetItemsFiltres()">↺ Réinitialiser</button>
+    </details>`
+}
+
+function toggleItemsSerie(s) {
+  filtreItemsSerie.has(s) ? filtreItemsSerie.delete(s) : filtreItemsSerie.add(s)
+  renderItemsSidebar(); renderItems()
+}
+function toggleItemsType(s) {
+  filtreItemsType.has(s) ? filtreItemsType.delete(s) : filtreItemsType.add(s)
+  renderItemsSidebar(); renderItems()
+}
+function toggleItemsCollec(s) {
+  filtreItemsCollec.has(s) ? filtreItemsCollec.delete(s) : filtreItemsCollec.add(s)
+  renderItemsSidebar(); renderItems()
+}
+function resetItemsFiltres() {
+  filtreItemsSerie=new Set(); filtreItemsType=new Set(); filtreItemsCollec=new Set()
+  renderItemsSidebar(); renderItems()
+}
+
+function renderItems() {
+  const el = document.getElementById('tab-items')
+  if (!el) return
+
+  const series = sortSeries([...new Set(itemsCache.map(c=>c.serie))])
+
+  // Langues dispo globalement
+  const allLangs = {jp:false, en:false, fr:false}
+  itemsCache.forEach(c => {
+    if (c.langue_dispo_jp==1) allLangs.jp = true
+    if (c.langue_dispo_en==1) allLangs.en = true
+    if (c.langue_dispo_fr==1) allLangs.fr = true
+  })
+
+  // Filtrage
+  const filtered = itemsCache.filter(c => {
+    if (filtreItemsSerie.size > 0 && !filtreItemsSerie.has(c.serie)) return false
+    if (filtreItemsType.size > 0 && !filtreItemsType.has(c.type_item)) return false
+    if (filtreItemsCollec.size > 0) {
+      const jp=getItemCollVal(c.id,'jp'), en=getItemCollVal(c.id,'en'), fr=getItemCollVal(c.id,'fr')
+      const ok = [...filtreItemsCollec].some(f => {
+        if (f==='Possédées (toutes)') return jp||en||fr
+        if (f==='Manquantes (toutes)') return !jp&&!en&&!fr
+        if (f==='Possédées JP') return jp
+        if (f==='Manquantes JP') return !jp
+        if (f==='Possédées EN') return en
+        if (f==='Manquantes EN') return !en
+        if (f==='Possédées FR') return fr
+        if (f==='Manquantes FR') return !fr
+        return true
+      })
+      if (!ok) return false
+    }
+    return true
+  })
+
+  // Stats sur toute la collection
+  const total = itemsCache.length
+  const possedes = itemsCache.filter(c =>
+    getItemCollVal(c.id,'jp') || getItemCollVal(c.id,'en') || getItemCollVal(c.id,'fr')
+  ).length
+  const pct = total ? (possedes/total*100).toFixed(1) : 0
+
+  const rows = filtered.map(c => {
+    const iid = c.id.replace(/'/g,"\\'")
+    const pj = getItemCollVal(c.id,'jp')
+    const pe = getItemCollVal(c.id,'en')
+    const pf = getItemCollVal(c.id,'fr')
+    const langs = {jp:c.langue_dispo_jp==1, en:c.langue_dispo_en==1, fr:c.langue_dispo_fr==1}
+    const checkCell = (lang, val, dispo) => {
+      if (!allLangs[lang]) return ''
+      if (!dispo) return `<td></td>`
+      return `<td><input type="checkbox" class="coll-check" ${val?'checked':''} onchange="onItemCheck('${iid}','${lang}',this.checked)"/></td>`
+    }
+    return `<tr>
+      <td><span class="tag-serie">${c.serie}</span></td>
+      <td style="text-align:left;color:var(--textb);font-size:12px">${c.serie_nom||''}</td>
+      <td style="font-size:12px;color:var(--text2);text-align:center">${c.type_item||''}</td>
+      ${checkCell('jp',pj,langs.jp)}
+      ${checkCell('en',pe,langs.en)}
+      ${checkCell('fr',pf,langs.fr)}
+    </tr>`
+  }).join('')
+
+  el.innerHTML = `
+    <div id="stats-bar-items" style="display:flex;align-items:center;gap:20px;padding:10px 16px;margin:8px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);flex-wrap:wrap">
+      <div class="stat-item"><b>Total</b><span>${total}</span></div>
+      <div class="stat-item"><b>Possédés</b><span>${possedes}</span></div>
+      <div class="progress-wrap">
+        <b>Progression</b>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+          <span class="pct">${pct}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll"><table>
+        <thead><tr>
+          <th>Série</th><th style="text-align:left">Nom série</th><th>Type</th>
+          ${allLangs.jp?`<th><img src="https://flagcdn.com/jp.svg" width="16" title="JP"/></th>`:''}
+          ${allLangs.en?`<th><img src="https://flagcdn.com/gb.svg" width="16" title="EN"/></th>`:''}
+          ${allLangs.fr?`<th><img src="https://flagcdn.com/fr.svg" width="16" title="FR"/></th>`:''}
+        </tr></thead>
+        <tbody>${rows||'<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text2)">Aucun item</td></tr>'}</tbody>
+      </table></div>
+    </div>`
+}
+
+init()
+</script>
+</body>
+</html>
