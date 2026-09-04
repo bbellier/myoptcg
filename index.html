@@ -150,7 +150,17 @@ tr.en-transit td{opacity:.5}
 .popup-box h3{font-family:var(--font-title);font-size:18px;letter-spacing:.1em;color:var(--textb);margin-bottom:12px}
 .popup-photo{width:100%;border-radius:var(--radius);margin-bottom:12px}
 .popup-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn-cam{color:var(--accent2);border-color:var(--accent);background:var(--accent3)}#btn-hamburger{display:none;position:fixed;bottom:20px;right:20px;z-index:300;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;font-size:18px;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);margin:0}
+.btn-cam{color:var(--accent2);border-color:var(--accent);background:var(--accent3)}
+/* ── TIPS ── */
+.tips-wrap{padding:10px 0;max-width:820px}
+.tips-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:16px}
+.tips-card h3{font-family:var(--font-title);font-size:18px;letter-spacing:.08em;color:var(--textb);text-transform:uppercase;margin-bottom:4px}
+.tips-card h4{font-family:var(--font-title);font-size:14px;letter-spacing:.06em;color:var(--accent2);text-transform:uppercase;margin:14px 0 6px}
+.tips-card p{color:var(--text);line-height:1.6;margin-bottom:6px}
+.tips-card ul{margin:6px 0 6px 18px;color:var(--text)}
+.tips-card li{margin-bottom:4px;line-height:1.6}
+.tips-stats{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+#btn-hamburger{display:none;position:fixed;bottom:20px;right:20px;z-index:300;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;font-size:18px;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);margin:0}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200}
 #sidebar-overlay.visible{display:block}
 @media(max-width:768px){
@@ -538,12 +548,14 @@ function renderMain() {
       <button class="tab-btn ${activeTab==='classeur'?'active':''}" onclick="switchTab('classeur',event)">CLASSEUR</button>
       <button class="tab-btn ${activeTab==='market'?'active':''}" onclick="switchTab('market',event)">MARKET</button>
       <button class="tab-btn ${activeTab==='items'?'active':''}" onclick="switchTab('items',event)">ITEMS</button>
+      <button class="tab-btn ${activeTab==='tips'?'active':''}" onclick="switchTab('tips',event)">TIPS DE COLLECTIONNEUR</button>
     </div>
     <div id="tab-cartes" class="tab-content ${activeTab==='cartes'?'active':''}"></div>
     <div id="tab-series" class="tab-content ${activeTab==='series'?'active':''}"></div>
     <div id="tab-classeur" class="tab-content ${activeTab==='classeur'?'active':''}"></div>
     <div id="tab-market" class="tab-content ${activeTab==='market'?'active':''}"></div>
-    <div id="tab-items" class="tab-content ${activeTab==='items'?'active':''}"></div>`
+    <div id="tab-items" class="tab-content ${activeTab==='items'?'active':''}"></div>
+    <div id="tab-tips" class="tab-content ${activeTab==='tips'?'active':''}"></div>`
   renderTabContent()
 }
 
@@ -558,7 +570,7 @@ function switchTab(t, evt) {
   const fs = document.getElementById('f-search-wrap')
   if (fs) fs.style.display = t==='cartes' ? '' : 'none'
   const sidebar = document.getElementById('sidebar')
-  if (sidebar) sidebar.style.display = (t==='classeur' || t==='series' || t==='market') ? 'none' : ''
+  if (sidebar) sidebar.style.display = (t==='classeur' || t==='series' || t==='market' || t==='tips') ? 'none' : ''
   if (t==='items') renderItemsSidebar()
   renderTabContent()
 }
@@ -569,6 +581,7 @@ function renderTabContent() {
   else if (activeTab==='classeur') renderClasseur()
   else if (activeTab==='market') renderMarket()
   else if (activeTab==='items') { renderItemsSidebar(); renderItems() }
+  else if (activeTab==='tips') renderTips()
 }
 
 // ── FILTRAGE ──────────────────────────────────────────────────
@@ -1325,6 +1338,36 @@ function renderItems() {
         </tr></thead>
         <tbody>${rows||'<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text2)">Aucun item</td></tr>'}</tbody>
       </table></div>
+    </div>`
+}
+
+// ── TIPS DE COLLECTIONNEUR ────────────────────────────────────
+function renderTips() {
+  const el = document.getElementById('tab-tips')
+  if (!el) return
+  el.innerHTML = `
+    <div class="tips-wrap">
+      <div class="tips-card">
+        <h3>Différences entre les cartes OP originales et les réimpressions PRB</h3>
+        <h4>PRB-01</h4>
+        <p>Pour les cartes provenant des séries OP-01 à OP-05, les réimpressions PRB-01 peuvent être différenciées grâce à l'illustration :</p>
+        <ul>
+          <li>Lorsque la carte possède une illustration dessinée au crayon, cette illustration est présente sur la version OP originale, mais pas sur la réimpression PRB-01.</li>
+          <li>À partir de OP-06, ce critère ne permet plus de faire la différence.</li>
+          <li>Il existe également quelques exceptions : certaines cartes utilisent exactement la même image issue du manga, sans mention d'illustrateur. Dans ce cas, la distinction est impossible.</li>
+        </ul>
+        <h4>PRB-02</h4>
+        <p>Pour les réimpressions PRB-02, la différence se trouve au niveau des mentions d'impression :</p>
+        <ul>
+          <li>La version PRB-02 possède une petite mention « EN » ou « FR » à côté de « Made in Japan ».</li>
+          <li>Cette mention n'est pas présente sur la carte originale.</li>
+        </ul>
+        <p>Ces détails permettent donc de distinguer une carte issue de sa série OP d'origine d'une réimpression provenant des sets PRB.</p>
+        <div class="tips-stats">
+          <div class="stat-item"><b>PRB-01</b><span>109 réimpressions</span></div>
+          <div class="stat-item"><b>PRB-02</b><span>140 réimpressions</span></div>
+        </div>
+      </div>
     </div>`
 }
 
