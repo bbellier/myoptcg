@@ -337,7 +337,7 @@ async function loadRef() {
     from += step
   }
   // Ordre personnalisé des raretés
-  const RARETE_ORDER = {
+ const RARETE_ORDER = {
     'Common':0,'Uncommon':0,'Leader':0,'Promo':0,
     'Rare':1,
     'Pirate Foil':2,'Pirate Foil 2':2,
@@ -346,6 +346,7 @@ async function loadRef() {
     'Super Rare':5,
     'Secret Rare':6,
     'Alternate Art':7,'Alternate Art 1':7,'Alternate Art 2':7,
+    'Alternate Art (Pirate Crew)':7,'Alternate Art (Super)':7,
     'Special Card':8,'Special Card 1':8,'Special Card 2':8,'Treasure Rare':8,
     'Manga Art':9,'Manga Art 1':9,'Manga Art 2':9,
     'DON!!':10,
@@ -823,7 +824,7 @@ function pastilleCouleur(couleur) {
 
 function badgeRarete(r) {
   if (!r || r==='NA') return ''
-  const abbr = {'Common':'C','Uncommon':'UC','Rare':'R','Super Rare':'SR','Secret Rare':'SEC','Treasure Rare':'TR','Leader':'L','Alternate Art':'ALT★','Alternate Art 1':'ALT★','Alternate Art 2':'ALT★','Manga Art':'MAN★','Manga Art 1':'MAN★','Manga Art 2':'MAN★','Full Art':'FA','Promo':'P','Pirate Foil':'PF','Pirate Foil 2':'PF','Textured Foil':'TF','Special Card':'SP','Special Card 1':'SP','Special Card 2':'SP','DON!!':'DON!!','DON!! (gold)':'DON(G)','DON!! (foil)':'DON(F)'}
+  const abbr = {'Common':'C','Uncommon':'UC','Rare':'R','Super Rare':'SR','Secret Rare':'SEC','Treasure Rare':'TR','Leader':'L','Alternate Art':'ALT★','Alternate Art 1':'ALT★','Alternate Art 2':'ALT★','Alternate Art (Pirate Crew)':'ALT (PC) ★','Alternate Art (Super)':'ALT (Super) ★','Manga Art':'MAN★','Manga Art 1':'MAN★','Manga Art 2':'MAN★','Full Art':'FA','Promo':'P','Pirate Foil':'PF','Pirate Foil 2':'PF','Textured Foil':'TF','Special Card':'SP','Special Card 1':'SP','Special Card 2':'SP','DON!!':'DON!!','DON!! (gold)':'DON(G)','DON!! (foil)':'DON(F)'}
   return `<span class="badge">${abbr[r]||r}</span>`
 }
 
@@ -1090,7 +1091,7 @@ async function ouvrirPhoto(serie, page) {
 
 function badgeRareteSlot(r) {
   if (!r || r==='NA') return ''
-  const abbr = {'Common':'C','Uncommon':'UC','Rare':'R','Super Rare':'SR','Secret Rare':'SEC','Treasure Rare':'TR','Leader':'L','Alternate Art':'ALT','Alternate Art 1':'ALT','Alternate Art 2':'ALT','Manga Art':'MAN','Manga Art 1':'MAN','Manga Art 2':'MAN','Full Art':'FA','Promo':'P','Pirate Foil':'PF','Pirate Foil 2':'PF','Textured Foil':'TF','Special Card':'SP','Special Card 1':'SP','Special Card 2':'SP','DON!!':'DON','DON!! (gold)':'DON-G','DON!! (foil)':'DON-F'}
+  const abbr = {'Common':'C','Uncommon':'UC','Rare':'R','Super Rare':'SR','Secret Rare':'SEC','Treasure Rare':'TR','Leader':'L','Alternate Art':'ALT★','Alternate Art 1':'ALT★','Alternate Art 2':'ALT★','Alternate Art (Pirate Crew)':'ALT (PC) ★','Alternate Art (Super)':'ALT (Super) ★','Manga Art':'MAN★','Manga Art 1':'MAN★','Manga Art 2':'MAN★','Full Art':'FA','Promo':'P','Pirate Foil':'PF','Pirate Foil 2':'PF','Textured Foil':'TF','Special Card':'SP','Special Card 1':'SP','Special Card 2':'SP','DON!!':'DON!!','DON!! (gold)':'DON(G)','DON!! (foil)':'DON(F)'}
   return abbr[r] || r
 }
 
